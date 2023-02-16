@@ -1,0 +1,184 @@
+<div class="container" style="margin-top: 100px;">
+    <div class="row mb-2">
+        <div class="col-8">
+            <h3>Productos</h3>
+        </div>
+        <div class="col-4 text-end">
+            <button class="btn btn-primary" (click)="open(registroModal)">Registrar Productos</button>
+        </div>
+        <div class="row">
+            <div class="col">
+                <button class="btn btn-outline-primary" *ngFor="let cat of categories" style="margin-left: 5px;" (click)="findByCategory(cat.id!)">{{cat.name}}</button>
+            </div>
+        </div>
+        <hr class="mt-2">
+    </div>
+    <div class="table-responsive" *ngIf="show; else sinRegistros">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th class="text-center">#</th>
+                    <th>Nombre</th>
+                    <th>Estatus</th>
+                    <th>Categoría</th>
+                    <th>Precio</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let item of products; let i = index;">
+                    <td class="text-center">{{i+1 | number}}</td>
+                    <td>{{item.name}}</td>
+                    <td><span [class]="getStatusClass(item.isActive!)">{{getStatusText(item.isActive!)}}</span></td>
+                    <td>{{item.category!.name | titlecase}}</td>
+                    <td>${{item.price | number}}</td>
+                    <td>
+                        <div class="row">
+                            <div class="col-4">
+                                <button class="btn btn-primary btn-sm" (click)="open2(detallesModal, item)">Detalles</button>
+                            </div>
+                            <div class="col-4">
+                                <button class="btn btn-danger btn-sm" (click)="inhabilitar(item.id!)" *ngIf="item.isActive; else activar">Inhabilitar</button>
+                                <ng-template #activar>
+                                    <button class="btn btn-success btn-sm" (click)="habilitar(item.id!)">Habilitar</button>
+                                </ng-template>
+                            </div>
+                            <div class="col-4">
+                                <button class="btn btn-info btn-sm" (click)="open2(actualizarModal, item)">Actualizar</button>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<ng-template #sinRegistros>
+    <div class="alert alert-primary">
+        <p>No se encontraron registros con esta categoría</p>
+    </div>
+</ng-template>
+
+<ng-template #registroModal let-modal>
+    <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">Registrar Producto</h4>
+        <button type="button" class="close btn" aria-label="Close" (click)="modal.dismiss('Cross click')">
+            <span aria-hidden="true">X</span>
+        </button>
+    </div>
+    <form autocomplete="off" (ngSubmit)="registrar()">
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-12 col-md-6 mt-2">
+                    <label for="name">Nombre</label>
+                    <input type="text" name="name" id="name" maxlength="45" class="form-control" placeholder="Nombre"
+                        [(ngModel)]="product.name" required>
+                </div>
+                <div class="col-12 col-md-6 mt-2">
+                    <label for="price">Precio</label>
+                    <input type="number" name="price" id="price" min="1000" class="form-control" placeholder="Precio"
+                        [(ngModel)]="product.price" required>
+                </div>
+                <div class="col-12 mt-2">
+                    <label for="description">Descripción</label>
+                    <textarea name="description" id="description" maxlength="250" cols="30" rows="10"
+                        class="form-control" [(ngModel)]="product.description" placeholder="Descripción" required></textarea>
+                </div>
+                <div class="col-12 mt-2">
+                    <div class="row">
+                        <div class="col-8">
+                            <label for="category">Categoría</label>
+                            <select name="category" id="category" class="form-select" [(ngModel)]="product.category">
+                                <option *ngFor="let cat of categories" [ngValue]="cat">{{cat.name}}</option>
+                            </select>
+                        </div>
+                        <div class="col-4 mt-4">
+                            <button type="button" class="btn btn-primary" (click)="registrarCategoria()">Registrar Categoría</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger" (click)="modal.close('Save click')">Cancelar</button>
+            <button type="submit" class="btn btn-success">Registrar</button>
+        </div>
+    </form>
+</ng-template>
+
+<ng-template #actualizarModal let-modal>
+    <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">Actualizar Producto</h4>
+        <button type="button" class="close btn" aria-label="Close" (click)="modal.dismiss('Cross click')">
+            <span aria-hidden="true">X</span>
+        </button>
+    </div>
+    <form autocomplete="off" (ngSubmit)="actualizar()">
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-12 col-md-6 mt-2">
+                    <label for="name">Nombre</label>
+                    <input type="text" name="name" id="name" maxlength="45" class="form-control" placeholder="Nombre"
+                        [(ngModel)]="product.name" required>
+                </div>
+                <div class="col-12 col-md-6 mt-2">
+                    <label for="price">Precio</label>
+                    <input type="number" name="price" id="price" min="1000" class="form-control" placeholder="Precio"
+                        [(ngModel)]="product.price" required>
+                </div>
+                <div class="col-12 mt-2">
+                    <label for="description">Descripción</label>
+                    <textarea name="description" id="description" maxlength="250" cols="30" rows="10"
+                        class="form-control" [(ngModel)]="product.description" placeholder="Descripción" required></textarea>
+                </div>
+                <div class="col-12 mt-2">
+                    <div class="row">
+                        <div class="col-8">
+                            <label for="category">Categoría</label>
+                            <select name="category" id="category" class="form-select" [(ngModel)]="product.category">
+                                <option *ngFor="let cat of categories" [ngValue]="cat">{{cat.name}}</option>
+                            </select>
+                        </div>
+                        <div class="col-4 mt-4">
+                            <button type="button" class="btn btn-primary" (click)="registrarCategoria()">Registrar Categoría</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger" (click)="modal.close('Save click')">Cancelar</button>
+            <button type="submit" class="btn btn-success">Registrar</button>
+        </div>
+    </form>
+</ng-template>
+
+<ng-template #detallesModal let-modal>
+    <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">Detalles del Producto</h4>
+        <button type="button" class="close btn" aria-label="Close" (click)="modal.dismiss('Cross click')">
+            <span aria-hidden="true">X</span>
+        </button>
+    </div>
+        <div class="modal-body">
+            <div class="row">
+                <div class="col-12 col-md-6 mt-2">
+                    <b>Nombre:</b> {{product.name |titlecase}}
+                </div>
+                <div class="col-12 col-md-6 mt-2">
+                    <b>Precio:</b> ${{product.price | number}}
+                </div>
+                <div class="col-12 mt-2">
+                    <b>Descripción:</b><br>
+                    <p>{{product.description}}</p>
+                </div>
+                <div class="col-12 mt-2">
+                    <b>Categoría: </b> {{product.category!.name}}
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-danger" (click)="modal.close('Save click')">Cerrar</button>
+        </div>
+</ng-template>
